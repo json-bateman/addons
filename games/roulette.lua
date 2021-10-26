@@ -21,7 +21,7 @@ local roundDefaults = {
     placeYourBets = false,
     spin = -1, 
     multiplier = 1,
-    payout = {}, --stores the amount earned during the raid
+    someEntries = 0
 }
 
 local round = roundDefaults
@@ -55,8 +55,8 @@ local function ParseMsg(msg, username)
     end
     if round.entriesCount == 0 then
         if TableLength(round.entries) > 0 and not round.acceptEntries then
-            round.spin = 37
-            
+            round.spin = math.random(0,37)
+            allEntries = TableLength(round.entries)
             round.placeYourBets = false
         end
         if round.spin == 37 then --fixes the case where someone bets 00
@@ -67,19 +67,21 @@ local function ParseMsg(msg, username)
             roundPayout = round.multiplier * 32
             for k,v in pairs (round.entries) do
                 local player = round.entries[k]
+                round.someEntries = round.someEntries + 1
                 if tonumber(v.bet) == round.spin then
                     ChatMsg(format("%s Wins: -- %sg!", k, roundPayout))
                     player.moneyWon = player.moneyWon + (roundPayout)
                 elseif v.bet == round.spin then --solves 00 case, they're both strings of "00" 
                     ChatMsg(format("%s Wins: -- %sg!", k, roundPayout))
                     player.moneyWon = player.moneyWon + (roundPayout)
-                else 
-                    for k,v in pairs (round.entries) do
-                        player.moneyWon = player.moneyWon - (round.multiplier * 1)
-                    end
+                else
+                    player.moneyWon = player.moneyWon - (round.multiplier * 1)
                     print (k, player.moneyWon)
                 end  
             end
+        if round.someEntries == allEntries then
+            ChatMsg(format('No winners this time!'))
+        end
         round.multiplier = 1
     end
 end
