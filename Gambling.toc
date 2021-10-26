@@ -1,0 +1,10 @@
+## Interface: 20502
+## Title: Gambling
+## Notes: A game for savages
+## Author: Momma-G
+## Version: 0.0.1
+## DefaultState: Disabled
+
+games/roulette.lua
+games/roll.lua
+gambling.xml
