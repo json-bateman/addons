@@ -77,7 +77,8 @@ local function ParseMsg(msg, username)
                 else
                     player.moneyWon = player.moneyWon - (round.multiplier * 1)
                     print (k, player.moneyWon)
-                end  
+                end 
+            player.entered = false 
             end
         if round.someEntries == allEntries then
             ChatMsg(format('No winners this time!'))
