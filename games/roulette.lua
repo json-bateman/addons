@@ -1,4 +1,5 @@
 --globals
+--stupid change lmao
 local wheel = {
     [0] = "green", [1] = "red", [2] = "black", [3] = "red", [4] = "black", [5] = "red", [6] = "black", [7] = "red", 
     [8] = "black", [9] = "red", [10] = "black", [11] = "black", [12] = "red", [13] = "black", [14] = "red", [15] = "black", [16] = "red",
