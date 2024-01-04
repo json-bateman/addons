@@ -147,35 +147,3 @@ SlashCmdList["PLACE"] = GAMBLE_place
 
 SLASH_RESULTS1 = "/results"
 SlashCmdList["RESULTS"] = GAMBLE_results
-
-local framer = CreateFrame("Frame")
-
--- Register to monitor events
-	framer:RegisterEvent("CHAT_MSG_RAID")
-	framer:RegisterEvent("CHAT_MSG_RAID_LEADER")
-	framer:RegisterEvent("CHAT_MSG_SAY")
-	framer:RegisterEvent("CHAT_MSG_SYSTEM")
-
--- Handle the events as they happen, pretty messy, only works for MSG_SYSTEM, RAID and SAY channels
-framer:SetScript("OnEvent", function(self, event, ...)
-    if ((event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_RAID") and round.acceptEntries and vars.currentChatMethod == "RAID") then
-        local msg, name = ... 
-        if string.lower(msg) == string.lower(vars.chatEnterMsg) then
-            AddPlayer(name); 
-        elseif string.lower(msg) == string.lower(vars.chatWithdrawMsg) then
-            print ("haven't made a remove function yet lmao") 
-        end
-
-    elseif event == "CHAT_MSG_SAY" and round.acceptEntries and vars.currentChatMethod == "SAY" then
-        local msg, name = ... 
-        if string.lower(msg) == string.lower(vars.chatEnterMsg) then
-            AddPlayer(name); 
-        end
-    elseif event == "CHAT_MSG_SAY" and round.placeYourBets then
-        local msg, name = ...
-        ParseMsg(msg,name);
-    elseif ((event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_RAID") and round.placeYourBets) then
-        local msg, name = ...
-        ParseMsg(msg,name);
-    end
-end)
