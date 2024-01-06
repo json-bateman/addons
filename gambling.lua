@@ -98,6 +98,7 @@ function addPlayer(name)
     }
     tinsert(session.players, newPlayer)
     print("player added")
+    chatMsg(format("%s has been added to gamba!", playerName))
 end
 
 function removePlayer(name)
@@ -105,6 +106,7 @@ function removePlayer(name)
         if (session.players[i].name == playerName) then
             tremove(session.players, i)
             print("player removed")
+            chatMsg(format("%s has been removed from gamba!", playerName))
             return
         end
     end
