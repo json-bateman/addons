@@ -5,9 +5,7 @@
 ## Version: 0.0.1
 ## DefaultState: Disabled
 
-config.lua
-init.lua
-core.lua
+gambling.lua
 gameFns/roulette.lua
 gameFns/roll.lua
 gameFns/wom.lua

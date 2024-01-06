@@ -12,7 +12,7 @@
 local vars = {
     chatEnterMsg = "gamer",
     chatWithdrawMsg = "poor", 
-    currentChatMethod = "RAID"
+    currentChatMethod = "SAY"
 }
  
 local roundDefaults = {
