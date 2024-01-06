@@ -9,6 +9,8 @@ by default the second name is a table that is automatically shared between all f
 ]]
 local addonName, gambling = ...
 
+-- A small little change smile
+
 -- GLOBAL VARS --
 local gameStates = {
     "REGISTRATION",
