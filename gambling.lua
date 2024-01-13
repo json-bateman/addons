@@ -9,8 +9,6 @@ by default the second name is a table that is automatically shared between all f
 ]]
 local addonName, gambling = ...
 
--- A small little change smile
-
 -- GLOBAL VARS --
 local gameStates = {
     "REGISTRATION",
@@ -64,6 +62,8 @@ session = {
     players = {},
     payout = 0,
     gameState = gameStates[1],
+    highTiebreaker = true,
+    lowTiebreaker = true,
 }
 
 local game = gambling.defaults.game
@@ -133,7 +133,7 @@ function checkPlayerRolls(participants)
     local playersToRoll = {}
     for i = 1, #participants do 
         if (participants[i].roll == nil) then
-            table.insert(playersToRoll, participants[i].name)
+            tinsert(playersToRoll, participants[i].name)
         end
     end
     return playersToRoll
@@ -153,7 +153,7 @@ end
 
 function recordRoll(playerName, actualRoll, minRoll, maxRoll)
     print(playerName, "---", actualRoll, "---", minRoll, "---", maxRoll);
-    if (tonumber(minRoll) == 1 and tonumber(maxRoll) == game.max) then
+    if (tonumber(minRoll) == 1 and tonumber(maxRoll) == game.max and not tiebreaker) then
         for i = 1, #session.players do 
             if (session.players[i].name == playerName and session.players[i].roll == nil) then
                 session.players[i].roll = tonumber(actualRoll)
@@ -175,10 +175,10 @@ function determineResults(participants)
         else 
             -- Handle Ties
             if (participants[i].roll == winners[1].roll) then
-                table.insert(winners, participants[i])
+                tinsert(winners, participants[i])
             end
             if (participants[i].roll == losers[1].roll) then
-                table.insert(losers, participants[i])
+                tinsert(losers, participants[i])
             end
         end
     end
@@ -235,8 +235,6 @@ function startRoll()
         -- Name comes in like this [playerName]-[realm]
         -- i.e. Mommadeez-CrusaderStrike
         -- So we must split name before adding to table.
-        playerName, _ = string.split('-', name)
-        
         if (event == "CHAT_MSG_SYSTEM") then
             handleSystemMessage(self, msg)
         end
@@ -247,35 +245,52 @@ function finishRoll()
     local playersToRoll = checkPlayerRolls(session.players); 
     if (#playersToRoll > 0) then
         chatMsg("Some players still need to roll!")
+        for _, player in ipairs(playersToRoll) do 
+            playerString = playerString .. ", " .. player
+        end
+        chatMsg(playerString .. " Still has to roll!")
+        return
+    end
+    local results = determineResults(session.players)
+    -- store initial payout, result of first round of rolls
+    if (session.results == nil) then
+        session.results = results 
+    end
+    
+    if (session.highTiebreaker) then
+        results = determineResults(session.players)
+        if (#results.winners = 1 and #results.losers = 1) then
+            session.results.winners = results.winners
+            session.highTiebreaker = false
+        end
+    end
+
+    if (session.lowTiebreaker) then 
+        results = determineResults(session.players)
+        if (#results.winners = 1 and #results.losers = 1) then 
+            session.results.losers = results.losers
+            session.lowTiebreaker = false
+        end
+    end
+        
+    
+    if (#session.results.winners > 1) then
+        session.highTiebreaker = true
+        session.players = results.winners
+        for _, player in ipairs(session.players) do 
+            player.roll = nil
+        end
+        chatMsg("High end tie breaker! " .. makeNameString(session.players) .. " /roll now!")
+    elseif(#session.results.losers > 1) then
+        session.lowTiebreaker = true
+        session.players = results.losers
+        for _, player in ipairs(session.players) do 
+            player.roll = nil
+        end
+        chatMsg("Low end tie breaker! " .. makeNameString(session.players) .. " /roll now!")
     else 
-        local results = determineResults(session.players)
-        print(results)
-        if (session.payout == 0) then 
-            session.payout = results.amountOwed
-        end
-        -- Handle Ties
-        tieBreakers = {}
-        if (#results.winners > 1 and #results.losers ~= 0) then
-            -- High End Tie Breaker
-            tieBreakers = results.winners
-            chatMsg("There's a high end tiebreaker!")
-        elseif (#results.losers > 1 and #results.winners ~= 0) then
-            -- Low End Tie Breaker
-            tieBreakers = results.losers
-            chatMsg("There's a low end tiebreaker!")
-        end
-        if (#tieBreakers > 0) then
-            session.players = tieBreakers
-            if (results.winners > 1) then 
-                chatMsg("High end tie breaker! " .. makeNameString(session.players) .. " /roll " .. game.max .. " now!", game.chatChannel) 
-            elseif (results.losers > 1) then 
-                chatMsg("Low end tie breaker! " .. makeNameString(session.players) .. " /roll " .. game.max .. " now!", game.chatChannel) 
-            end
-            for _, player in ipairs(session.players) do
-                v.roll = nil
-            end
-        end
-        chatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", results.winners[1].name, results.losers[1].name, math.floor(session.payout/100), session.payout % 100))
+        -- No Ties, no tiebreaker needed, display results 
+        chatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.winners[1].name, session.results.losers[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100))
     end
 end
 
