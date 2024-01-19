@@ -1,7 +1,3 @@
------------- Youtube Tutorial ---------------
--- Much of this is taken from Mayron's awesome youtube series on how to make a WoW addon.
--- https://www.youtube.com/watch?v=nfaE7NQhMlc&list=PL3wt7cLYn4N-3D3PTTUZBM2t1exFmoA2G&index=1
-
 --[[
 ... is a variable operator, it's all of the variables that are supplied to the function or file
 in this case you are automatically given 2 arguments, name and namespace of the addon
@@ -15,11 +11,9 @@ local gameStates = {
     "ROLLING",
 }
 
--- Spoilers!
 local gameModes = {
     "ROLL",
-    "ROULETTE",
-    "WOM",
+    "LOTTERY",
 }
 
 local chatChannels = {
@@ -70,7 +64,7 @@ local game = gambling.defaults.game
 
 
 -------------------------
--- Game Functions
+-- Classic Gamble Functions
 -------------------------
 function tprint (tbl, indent)
     if not indent then indent = 0 end
@@ -259,7 +253,7 @@ function finishRoll()
     
     if (session.highTiebreaker) then
         results = determineResults(session.players)
-        if (#results.winners = 1 and #results.losers = 1) then
+        if (#results.winners == 1 and #results.losers == 1) then
             session.results.winners = results.winners
             session.highTiebreaker = false
         end
@@ -267,7 +261,7 @@ function finishRoll()
 
     if (session.lowTiebreaker) then 
         results = determineResults(session.players)
-        if (#results.winners = 1 and #results.losers = 1) then 
+        if (#results.winners == 1 and #results.losers == 1) then 
             session.results.losers = results.losers
             session.lowTiebreaker = false
         end
@@ -295,6 +289,47 @@ function finishRoll()
 end
 
 -------------------------
+-- Lottery Functions
+-------------------------
+function convertMoney(money)
+    local gold = floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD))
+    local silver = floor((money % (COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
+    local copper = money % COPPER_PER_SILVER
+    return gold, silver, copper
+end
+
+function captureMoneyTraded()
+    local playerMoney = GetPlayerTradeMoney()
+    local targetMoney = GetTargetTradeMoney()
+
+    local playerGold, playerSilver, playerCopper = convertMoney(playerMoney)
+    local targetGold, targetSilver, targetCopper = convertMoney(targetMoney)
+
+    return playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
+end
+
+function tradeHandler(self, event, ...)
+    print("Event: " .. event)
+
+    local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
+    if event == "TRADE_ACCEPT_UPDATE" then
+        local playerAccept, targetAccept = ...
+        local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper = captureMoneyTraded()
+        if targetAccept == 1 and targetCopper == 1 then
+            print('playerCopper: ', playerCopper, "targetCopper: ", targetCopper)
+            AcceptTrade()
+        end
+    end
+    if event == "TRADE_REQUEST_CANCEL" then
+end
+
+local tradeFrame = CreateFrame("Frame")
+tradeFrame:RegisterEvent("TRADE_SHOW")
+tradeFrame:RegisterEvent("TRADE_ACCEPT_UPDATE")
+tradeFrame:RegisterEvent("TRADE_CLOSED")
+tradeFrame:SetScript("OnEvent", tradeHandler)
+
+-------------------------
 -- Game UI
 -------------------------
 gambling.UI = {};
@@ -307,12 +342,13 @@ end
 
 function UI:Toggle()
     if not Interface then
-        Interface = UI:CreateMenu();
+        Interface = UI:CreateClassicMenu();
     end
     Interface:SetShown(not Interface:IsShown());
 end
 
-function UI:CreateMenu()
+
+function UI:CreateClassicMenu()
     --[[ Args 
         1. Type of frame - "Frame"
         2. Name to access from with
@@ -398,16 +434,6 @@ function UI:CreateMenu()
     UI.goldSlider:SetValueStep(1);
     UI.goldSlider:SetObeyStepOnDrag(true);
 
-    -- UI New Game Function
-    UI.finishRoll = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
-    UI.finishRoll:SetPoint("CENTER", UI, "TOP", 0, -130);
-    UI.finishRoll:SetSize(110, 30);
-    UI.finishRoll:SetText("Finish Roll");
-    UI.finishRoll:SetNormalFontObject("GameFontNormal");
-    UI.finishRoll:SetHighlightFontObject("GameFontHighlight");
-
-    UI.finishRoll:SetScript("OnClick", finishRoll); 
-    
     -- Assuming UI.goldSlider is already created
     UI.goldSlider.text = UI.goldSlider:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     UI.goldSlider.text:SetPoint("TOP", UI.goldSlider, "BOTTOM", 0, -5)  -- Adjust the position as needed
@@ -426,6 +452,29 @@ function UI:CreateMenu()
     return UI;
 end
 
+function UI:CreateLotteryMenu()
+    local UI = CreateFrame("Frame", "Gambling", UIParent, "BasicFrameTemplate");
+    UI:SetSize(200,240); --width / height
+    UI:SetPoint("CENTER") -- point, relativeFrame, relativePoint, xOffset, yOffset
+    UI.title = UI:CreateFontString(nil, "OVERLAY");
+    UI.title:SetFontObject("GameFontHighlight");
+    UI.title:SetPoint("LEFT", UI.TitleBg, "LEFT", 5, 0);
+    UI.title:SetText("MommaG's Lottery");
+    
+    -- UI Open Entries Button: 
+    UI.openEntries = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
+    UI.openEntries:SetPoint("CENTER", UI, "TOP", 0, -50);
+    UI.openEntries:SetSize(110, 30);
+    UI.openEntries:SetText("Open Entries");
+    UI.openEntries:SetNormalFontObject("GameFontNormal");
+    UI.openEntries:SetHighlightFontObject("GameFontHighlight");
+    
+    UI.openEntries:SetScript("OnClick", openEntries); 
+
+    UI:Hide();
+    return UI;
+end
+
 --[[Initializes all of the /slash commands to be used in the app
     Loads on the event "ADDON_LOADED"
     Adds 2 convenience functions: 
@@ -438,7 +487,7 @@ end
 -------------------------
 
 gambling.commands = {
-    menu = gambling.UI.Toggle,
+    classic = gambling.UI.Toggle,
     help = function() 
         gambling:Print("List of all slash commands:")
         gambling:Print("|cff00cc66/gamba help|r - Shows all commands")
