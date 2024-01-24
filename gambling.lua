@@ -35,7 +35,7 @@ gambling.theme = {
 ---------------------------------
 gambling.defaults = {
     game = {
-        enterMessage = "gamba gamba",
+        enterMessage = "gamba",
         leaveMessage = "job done",
         mode = gameModes[1],
         chatChannel = chatChannels[1],
@@ -51,14 +51,16 @@ gambling.defaults = {
 }
 
 session = {
-    currentChatMethod = chatChannels[2],
+    currentChatMethod = chatChannels[3],
     wager = 1,
     players = {},
     payout = 0,
     gameState = gameStates[1],
-    highTiebreaker = true,
-    lowTiebreaker = true,
+    highTiebreaker = false,
+    lowTiebreaker = false,
 }
+
+local emptyGameState = session; 
 
 local game = gambling.defaults.game
 
@@ -206,7 +208,6 @@ function openEntries()
             if ( ((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID")) and msg == game.enterMessage ) then
                 addPlayer(playerName)
             elseif ( ((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID")) and msg == game.leaveMessage ) then
-                print("here!")
                 removePlayer(playerName)
             end
         end)
@@ -283,9 +284,18 @@ function finishRoll()
         end
         chatMsg("Low end tie breaker! " .. makeNameString(session.players) .. " /roll now!")
     else 
-        -- No Ties, no tiebreaker needed, display results 
-        chatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.winners[1].name, session.results.losers[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100))
+        -- No Ties, no tiebreaker needed, display results and reset game state 
+        chatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.losers[1].name, session.results.winners[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100))
+        -- TODO: Clean this up
+        session = {
+            players = {},
+            payout = 0,
+            gameState = gameStates[1],
+            highTiebreaker = false,
+            lowTiebreaker = false,
+        }
     end
+
 end
 
 -------------------------
@@ -308,20 +318,20 @@ function captureMoneyTraded()
     return playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
 end
 
-function tradeHandler(self, event, ...)
-    print("Event: " .. event)
+-- function tradeHandler(self, event, ...)
+--     print("Event: " .. event)
 
-    local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
-    if event == "TRADE_ACCEPT_UPDATE" then
-        local playerAccept, targetAccept = ...
-        local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper = captureMoneyTraded()
-        if targetAccept == 1 and targetCopper == 1 then
-            print('playerCopper: ', playerCopper, "targetCopper: ", targetCopper)
-            AcceptTrade()
-        end
-    end
-    if event == "TRADE_REQUEST_CANCEL" then
-end
+--     local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
+--     if event == "TRADE_ACCEPT_UPDATE" then
+--         local playerAccept, targetAccept = ...
+--         local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper = captureMoneyTraded()
+--         if targetAccept == 1 and targetCopper == 1 then
+--             print('playerCopper: ', playerCopper, "targetCopper: ", targetCopper)
+--             AcceptTrade()
+--         end
+--     end
+--     if event == "TRADE_REQUEST_CANCEL" then
+-- end
 
 local tradeFrame = CreateFrame("Frame")
 tradeFrame:RegisterEvent("TRADE_SHOW")
