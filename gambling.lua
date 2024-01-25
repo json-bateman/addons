@@ -41,7 +41,7 @@ gambling.defaults = {
         chatChannel = chatChannels[1],
         houseCut = 0,
         min = 1,
-        max = 100,
+        max = 2,
     },
     stats = {
         player = {},
@@ -59,8 +59,6 @@ session = {
     highTiebreaker = false,
     lowTiebreaker = false,
 }
-
-local emptyGameState = session; 
 
 local game = gambling.defaults.game
 
@@ -172,8 +170,7 @@ function determineResults(participants)
             -- Handle Ties
             if (participants[i].roll == winners[1].roll) then
                 tinsert(winners, participants[i])
-            end
-            if (participants[i].roll == losers[1].roll) then
+            elseif (participants[i].roll == losers[1].roll) then
                 tinsert(losers, participants[i])
             end
         end
@@ -190,7 +187,9 @@ end
 local chatFrame = CreateFrame("Frame")
 chatFrame:RegisterEvent("CHAT_MSG_SAY")
 chatFrame:RegisterEvent("CHAT_MSG_PARTY")
+chatFrame:RegisterEvent("CHAT_MSG_PARTY_LEADER")
 chatFrame:RegisterEvent("CHAT_MSG_RAID")
+chatFrame:RegisterEvent("CHAT_MSG_RAID_LEADER")
 chatFrame:RegisterEvent("CHAT_MSG_SYSTEM")
 
 -------------------------
@@ -220,7 +219,7 @@ function startRoll()
     if (session.gameState == gameStates[1]) then
         session.gameState = gameStates[2]
     else 
-        print(format("Rolls already begun. Current state is %s", session.gameState));
+        print(format("Rolls already begun. Current state is %s, current roll is %s", session.gameState, game.max));
         return
     end
 
@@ -238,8 +237,10 @@ end
 
 function finishRoll()
     local playersToRoll = checkPlayerRolls(session.players); 
+    tprint(playersToRoll)
     if (#playersToRoll > 0) then
         chatMsg("Some players still need to roll!")
+        local playerString = "";
         for _, player in ipairs(playersToRoll) do 
             playerString = playerString .. ", " .. player
         end
@@ -269,6 +270,8 @@ function finishRoll()
     end
         
     
+    tprint(session.results.winners)
+    tprint(session.results.losers)
     if (#session.results.winners > 1) then
         session.highTiebreaker = true
         session.players = results.winners
@@ -287,13 +290,9 @@ function finishRoll()
         -- No Ties, no tiebreaker needed, display results and reset game state 
         chatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.losers[1].name, session.results.winners[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100))
         -- TODO: Clean this up
-        session = {
-            players = {},
-            payout = 0,
-            gameState = gameStates[1],
-            highTiebreaker = false,
-            lowTiebreaker = false,
-        }
+        session.players = {};
+        session.payout = 0;
+        session.gameState = gameStates[1];
     end
 
 end
