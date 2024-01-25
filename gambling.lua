@@ -41,7 +41,7 @@ gambling.defaults = {
         chatChannel = chatChannels[1],
         houseCut = 0,
         min = 1,
-        max = 2,
+        max = 100,
     },
     stats = {
         player = {},
@@ -141,17 +141,14 @@ end
 function handleSystemMessage(_, text)
     -- Parses system messages recieved by the Event Listener to find and record player rolls
     local playerName, actualRoll, minRoll, maxRoll = strmatch(text, "^([^ ]+) .+ (%d+) %((%d+)-(%d+)%)%.?$")
-    print(playerName, "---", actualRoll, "---", minRoll, "---", maxRoll);
     recordRoll(playerName, actualRoll, minRoll, maxRoll);
 end
 
 function recordRoll(playerName, actualRoll, minRoll, maxRoll)
-    print(playerName, "---", actualRoll, "---", minRoll, "---", maxRoll);
     if (tonumber(minRoll) == 1 and tonumber(maxRoll) == game.max and not tiebreaker) then
         for i = 1, #session.players do 
             if (session.players[i].name == playerName and session.players[i].roll == nil) then
                 session.players[i].roll = tonumber(actualRoll)
-                print (session.players[i].roll)
             end
         end
     end
@@ -267,9 +264,6 @@ function finishRoll()
         end
     end
         
-    
-    tprint(session.results.winners)
-    tprint(session.results.losers)
     if (#session.results.winners > 1) then
         session.highTiebreaker = true
         session.players = results.winners
