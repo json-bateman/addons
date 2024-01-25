@@ -187,9 +187,7 @@ end
 local chatFrame = CreateFrame("Frame")
 chatFrame:RegisterEvent("CHAT_MSG_SAY")
 chatFrame:RegisterEvent("CHAT_MSG_PARTY")
-chatFrame:RegisterEvent("CHAT_MSG_PARTY_LEADER")
 chatFrame:RegisterEvent("CHAT_MSG_RAID")
-chatFrame:RegisterEvent("CHAT_MSG_RAID_LEADER")
 chatFrame:RegisterEvent("CHAT_MSG_SYSTEM")
 
 -------------------------
@@ -287,9 +285,9 @@ function finishRoll()
         end
         chatMsg("Low end tie breaker! " .. makeNameString(session.players) .. " /roll now!")
     else 
-        -- No Ties, no tiebreaker needed, display results and reset game state 
+        -- No Ties, no tiebreaker needed, display results: 
         chatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.losers[1].name, session.results.winners[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100))
-        -- TODO: Clean this up
+        -- Reset important game state variables
         session.players = {};
         session.payout = 0;
         session.gameState = gameStates[1];
