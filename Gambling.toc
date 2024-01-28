@@ -5,8 +5,7 @@
 ## Version: 0.0.1
 ## DefaultState: Disabled
 
+globals.lua
+utils.lua
+games/roll.lua
 gambling.lua
-gameFns/roulette.lua
-gameFns/roll.lua
-gameFns/wom.lua
-gambling.xml
