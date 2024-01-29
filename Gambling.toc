@@ -4,6 +4,7 @@
 ## Author: MommaG
 ## Version: 0.0.1
 ## DefaultState: Disabled
+## SavedVariables: DB
 
 globals.lua
 utils.lua

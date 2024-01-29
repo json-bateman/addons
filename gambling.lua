@@ -1,5 +1,19 @@
 local addonName, gambling = ...
 
+local function changeChatChannel(chatChannel)
+    if (chatChannel == ChatChannels[1]) then
+        gambling.game.chatChannel = ChatChannels[2]
+        return ChatChannels[2]
+    end
+    if (chatChannel == ChatChannels[2]) then
+        gambling.game.chatChannel = ChatChannels[3]
+        return ChatChannels[3]
+    end
+    if (chatChannel == ChatChannels[3]) then
+        gambling.game.chatChannel = ChatChannels[1]
+        return ChatChannels[1]
+    end
+end
 -------------------------
 -- Game UI
 -------------------------
@@ -90,7 +104,7 @@ function UI:CreateClassicMenu()
     UI.goldSlider = CreateFrame("Slider", nil, UI, "OptionsSliderTemplate");
     UI.goldSlider:SetPoint("CENTER", UI, "TOP", 0, -170);
     UI.goldSlider:SetMinMaxValues(1, 10);
-    UI.goldSlider:SetValue(gambling.defaults.game.wager);
+    UI.goldSlider:SetValue(gambling.game.wager);
     UI.goldSlider:SetValueStep(1);
     UI.goldSlider:SetObeyStepOnDrag(true);
 
@@ -103,37 +117,40 @@ function UI:CreateClassicMenu()
 
     UI.goldSlider:SetScript("OnValueChanged", function(self, value)
         self.text:SetText(string.format("%dg", math.floor(value)))  -- Update the text display
-        gambling.defaults.game.wager = math.floor(value)
+        gambling.game.wager = math.floor(value)
     end)
 
     -- UI Message Channel Type
 
     UI.msgSay = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
-    UI.msgSay:SetPoint("CENTER", UI, "TOP", -60, -210);
-    UI.msgSay:SetSize(50, 20);
-    UI.msgSay:SetText("Say");
+    UI.msgSay:SetPoint("CENTER", UI, "TOP", 0, -210);
+    UI.msgSay:SetSize(60, 20);
+    UI.msgSay:SetText("SAY");
     UI.msgSay:SetNormalFontObject("GameFontNormal");
     UI.msgSay:SetHighlightFontObject("GameFontHighlight");
 
-    UI.msgSay:SetScript("OnClick", function(_) gambling.defaults.game.chatChannel = ChatChannels[1] end);
+    UI.msgSay:SetScript("OnClick", function(self) 
+        local newChannelText = changeChatChannel(gambling.game.chatChannel)
+        self:SetText(newChannelText)
+    end);
 
-    UI.msgParty = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
-    UI.msgParty:SetPoint("CENTER", UI, "TOP", 0, -210);
-    UI.msgParty:SetSize(50, 20);
-    UI.msgParty:SetText("Party");
-    UI.msgParty:SetNormalFontObject("GameFontNormal");
-    UI.msgParty:SetHighlightFontObject("GameFontHighlight");
+    -- UI.msgParty = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
+    -- UI.msgParty:SetPoint("CENTER", UI, "TOP", 0, -210);
+    -- UI.msgParty:SetSize(50, 20);
+    -- UI.msgParty:SetText("Party");
+    -- UI.msgParty:SetNormalFontObject("GameFontNormal");
+    -- UI.msgParty:SetHighlightFontObject("GameFontHighlight");
 
-    UI.msgParty:SetScript("OnClick", function(_) gambling.defaults.game.chatChannel = ChatChannels[2] end);
+    -- UI.msgParty:SetScript("OnClick", function(_) gambling.game.chatChannel = ChatChannels[2] end);
 
-    UI.msgRaid = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
-    UI.msgRaid:SetPoint("CENTER", UI, "TOP", 60, -210);
-    UI.msgRaid:SetSize(50, 20);
-    UI.msgRaid:SetText("Raid");
-    UI.msgRaid:SetNormalFontObject("GameFontNormal");
-    UI.msgRaid:SetHighlightFontObject("GameFontHighlight");
+    -- UI.msgRaid = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
+    -- UI.msgRaid:SetPoint("CENTER", UI, "TOP", 60, -210);
+    -- UI.msgRaid:SetSize(50, 20);
+    -- UI.msgRaid:SetText("Raid");
+    -- UI.msgRaid:SetNormalFontObject("GameFontNormal");
+    -- UI.msgRaid:SetHighlightFontObject("GameFontHighlight");
 
-    UI.msgParty:SetScript("OnClick", function(_) gambling.defaults.game.chatChannel = ChatChannels[3] end);
+    -- UI.msgParty:SetScript("OnClick", function(slef) gambling.game.chatChannel = ChatChannels[3] end);
 
     UI:Hide();
     return UI;
@@ -217,9 +234,10 @@ function gambling:Print(...)
     DEFAULT_CHAT_FRAME:AddMessage(string.join(" ", prefix, tostringall(...)));
 end
 
--- Self automatically becomes events frame!
 function gambling:init(event, name)
     if (addonName ~= "Gambling") then return end
+    
+    DB = DB or {}
 
     -- Register Slash Commands!
     SLASH_RELOADUI1 = "/rl" -- reload UI shortened from /reload

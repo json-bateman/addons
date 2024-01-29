@@ -8,8 +8,7 @@ local session = {
     lowTiebreaker = false,
 }
 
-local chatChannel = gambling.defaults.game.chatChannel
-local game = gambling.defaults.game
+local game = gambling.game
 
 -------------------------
 -- Classic Gamble Functions
@@ -27,9 +26,26 @@ local function addPlayer(playerName)
     }
     tinsert(session.players, newPlayer)
     print("player added")
-    if (chatChannel ~= "SAY") then -- "SAY" channel is protected from spam
+    if (game.chatChannel ~= "SAY") then -- "SAY" channel is protected from spam
         SendChatMessage(format("%s has been added to gamba!", playerName))
     end
+end
+
+local function updateOverallStats(player, amount)
+    DB.stats = DB.stats or {}
+    -- if they are already in table
+    for i = 1, #DB.stats do 
+        if (DB.stats[i].name == player.name) then
+            DB.stats[i].totalWinnings = DB.stats[i].totalWinnings + amount;
+            return
+        end
+    end
+    -- if they don't add them
+    local addedPlayer = {
+        name = player.name,
+        totalWinnings = amount,
+    }
+    tinsert(DB.stats, addedPlayer)
 end
 
 local function removePlayer(playerName)
@@ -47,7 +63,7 @@ local function checkPlayerRolls(participants)
     local playersToRoll = {}
     for i = 1, #participants do
         if (participants[i].roll == nil) then
-            tinsert(playersToRoll, participants[i].name)
+            tinsert(playersToRoll, participants[i])
         end
     end
     return playersToRoll
@@ -110,13 +126,15 @@ chatFrame:RegisterEvent("CHAT_MSG_RAID")
 chatFrame:RegisterEvent("CHAT_MSG_SYSTEM")
 
 function OpenEntries()
+    Tprint(game)
     if (session.gameState ~= GameStates[1]) then
         print("Incorrect game state, cannot open entries")
         return
     end
-    ChatMsg(".:MommaDeez's Casino:. --Classic Roll Off!--", chatChannel)
-    ChatMsg(format("Please type `%s` to join the round (type `%s` to leave).", game.enterMessage, game.leaveMessage), chatChannel)
-    ChatMsg(format("Current Stakes are: %sg", game.wager, chatChannel))
+    print(game.chatChannel)
+    ChatMsg(".:MommaG's Casino:. --Classic Roll Off!--", game.chatChannel)
+    ChatMsg(format("Please type `%s` to join the round (type `%s` to leave).", game.enterMessage, game.leaveMessage), game.chatChannel)
+    ChatMsg(format("Current Stakes are: %sg", game.wager, game.chatChannel))
 
     chatFrame:SetScript("OnEvent", function(self, event, msg, name, ...)
         -- Name comes in like this [playerName]-[realm]
@@ -133,8 +151,8 @@ function OpenEntries()
 end
 
 function StartRoll()
-    if (#session.players < 2) then 
-        print("At least 2 people need to join before rolling begins")
+    if (#session.players < 1) then 
+        print("At least 1 person needs to join before rolling begins")
         return
     end
     if (session.gameState == GameStates[1]) then
@@ -144,7 +162,7 @@ function StartRoll()
         return
     end
 
-    ChatMsg("Begin rolling you degenerate gamblers!", chatChannel)
+    ChatMsg("Begin rolling you degenerate gamblers!", game.chatChannel)
     chatFrame:SetScript("OnEvent", function(self, event, msg, name, ...)
         if (event == "CHAT_MSG_SYSTEM") then
             handleSystemMessage(self, msg)
@@ -154,14 +172,14 @@ end
 
 function FinishRoll()
     if (session.gameState ~= GameStates[2]) then
-        print("Incorrect game state, game state is currently %s", session.gameState)
+        print("Incorrect game state, game state is currently ", session.gameState)
         return
     end
     local playersToRoll = checkPlayerRolls(session.players);
-    Tprint(playersToRoll)
     if (#playersToRoll > 0) then
         SendChatMessage("Some players still need to roll!")
-        print(MakeNameString(playersToRoll))
+        ChatMsg(MakeNameString(playersToRoll), game.chatChannel)
+        return
     end
     local results = determineResults(session.players)
     if (results == nil) then return end
@@ -170,6 +188,7 @@ function FinishRoll()
         session.results = results
     end
 
+    -- Tiebreaker Logic --
     if (session.highTiebreaker) then
         results = determineResults(session.players)
         if (results ~= nil and #results.winners == 1 and #results.losers == 1) then
@@ -202,11 +221,14 @@ function FinishRoll()
         SendChatMessage("Low end tie breaker! " .. MakeNameString(session.players) .. " /roll now!")
     else
         -- No Ties, no tiebreaker needed, display results: 
-        print(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.losers[1].name, session.results.winners[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100))
-        SendChatMessage(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.losers[1].name, session.results.winners[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100))
+        ChatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.losers[1].name, session.results.winners[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100), game.chatChannel)
         -- Reset important game state variables
         session.players = {};
         session.payout = 0;
         session.gameState = GameStates[1];
+        -- Add stats to database
+        updateOverallStats(session.results.winners[1], session.results.amountOwed)
+        updateOverallStats(session.results.losers[1], -session.results.amountOwed)
+        Tprint(DB)
     end
 end

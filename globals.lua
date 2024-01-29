@@ -30,24 +30,13 @@ gambling.theme = {
     hex = "00ccff",
 }
 
----------------------------------
--- Defaults (usually a database!)
----------------------------------
-gambling.defaults = {
-    game = {
-        enterMessage = "gamba",
-        leaveMessage = "job done",
-        mode = GameModes[1],
-        chatChannel = ChatChannels[1],
-        houseCut = 0,
-        wager = 1,
-        min = 1,
-        max = 100,
-    },
-    stats = {
-        player = {},
-        aliases = {},
-        house = 0
-    },
+gambling.game = {
+    enterMessage = "gamba",
+    leaveMessage = "job done",
+    mode = GameModes[1],
+    chatChannel = ChatChannels[1],
+    houseCut = 0,
+    wager = 1,
+    min = 1,
+    max = 100,
 }
-
