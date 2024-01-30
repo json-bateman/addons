@@ -3,6 +3,7 @@ local _, gambling = ...
 local session = {
     players = {},
     payout = 0,
+    results = nil,
     gameState = GameStates[1],
     highTiebreaker = false,
     lowTiebreaker = false,
@@ -27,7 +28,7 @@ local function addPlayer(playerName)
     tinsert(session.players, newPlayer)
     print("player added")
     if (game.chatChannel ~= "SAY") then -- "SAY" channel is protected from spam
-        SendChatMessage(format("%s has been added to gamba!", playerName))
+        ChatMsg(format("%s has been added to gamba!", playerName), ChatChannels)
     end
 end
 
@@ -40,7 +41,7 @@ local function updateOverallStats(player, amount)
             return
         end
     end
-    -- if they don't add them
+    -- if they aren't in table add them
     local addedPlayer = {
         name = player.name,
         totalWinnings = amount,
@@ -126,7 +127,6 @@ chatFrame:RegisterEvent("CHAT_MSG_RAID")
 chatFrame:RegisterEvent("CHAT_MSG_SYSTEM")
 
 function OpenEntries()
-    Tprint(game)
     if (session.gameState ~= GameStates[1]) then
         print("Incorrect game state, cannot open entries")
         return
@@ -223,12 +223,19 @@ function FinishRoll()
         -- No Ties, no tiebreaker needed, display results: 
         ChatMsg(format("%s owes %s: %d Gold %d Silver! Lmao rekt and also got em.", session.results.losers[1].name, session.results.winners[1].name, math.floor(session.results.amountOwed/100), session.results.amountOwed % 100), game.chatChannel)
         -- Reset important game state variables
-        session.players = {};
-        session.payout = 0;
-        session.gameState = GameStates[1];
         -- Add stats to database
         updateOverallStats(session.results.winners[1], session.results.amountOwed)
         updateOverallStats(session.results.losers[1], -session.results.amountOwed)
-        Tprint(DB)
+        ResetRollGame()
     end
+end
+
+function ResetRollGame()
+    session.players = {};
+    session.payout = 0;
+    session.results = nil;
+    session.gameState = GameStates[1];
+    session.highTiebreaker = false;
+    session.lowTiebreaker = false;
+    print("Game has been reset.")
 end

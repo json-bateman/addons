@@ -14,6 +14,24 @@ local function changeChatChannel(chatChannel)
         return ChatChannels[1]
     end
 end
+
+local function clearDb() 
+    DB = {};
+    print("Database has been cleared")
+end
+
+local function announceStats() 
+    -- TODO: Format and print out top 5 winners and top 5 losers over the persistant DB.
+    if (DB.stats ~= nil) then
+        table.sort(DB.stats, function(a, b) return a.totalWinnings < b.totalWinnings end)
+        for i = 1, #DB.stats do
+            ChatMsg(format("%s. %s won %s Silver!", i, DB.stats[i].name, DB.stats[i].totalWinnings), gambling.game.chatChannel)
+        end
+        Tprint(DB.stats)
+    else
+        print("Table is empty")
+    end
+end
 -------------------------
 -- Game UI
 -------------------------
@@ -49,7 +67,7 @@ function UI:CreateClassicMenu()
         HIGHLIGHT
     ]]
 
-    UI:SetSize(200,240); --width / height
+    UI:SetSize(200,280); --width / height
     UI:SetPoint("CENTER") -- point, relativeFrame, relativePoint, xOffset, yOffset
 
     UI.title = UI:CreateFontString(nil, "OVERLAY");
@@ -134,23 +152,14 @@ function UI:CreateClassicMenu()
         self:SetText(newChannelText)
     end);
 
-    -- UI.msgParty = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
-    -- UI.msgParty:SetPoint("CENTER", UI, "TOP", 0, -210);
-    -- UI.msgParty:SetSize(50, 20);
-    -- UI.msgParty:SetText("Party");
-    -- UI.msgParty:SetNormalFontObject("GameFontNormal");
-    -- UI.msgParty:SetHighlightFontObject("GameFontHighlight");
+    UI.msgSay = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
+    UI.msgSay:SetPoint("CENTER", UI, "TOP", 0, -240);
+    UI.msgSay:SetSize(90, 20);
+    UI.msgSay:SetText("RESET GAME");
+    UI.msgSay:SetNormalFontObject("GameFontNormal");
+    UI.msgSay:SetHighlightFontObject("GameFontHighlight");
 
-    -- UI.msgParty:SetScript("OnClick", function(_) gambling.game.chatChannel = ChatChannels[2] end);
-
-    -- UI.msgRaid = CreateFrame("Button", nil, UI, "GameMenuButtonTemplate");
-    -- UI.msgRaid:SetPoint("CENTER", UI, "TOP", 60, -210);
-    -- UI.msgRaid:SetSize(50, 20);
-    -- UI.msgRaid:SetText("Raid");
-    -- UI.msgRaid:SetNormalFontObject("GameFontNormal");
-    -- UI.msgRaid:SetHighlightFontObject("GameFontHighlight");
-
-    -- UI.msgParty:SetScript("OnClick", function(slef) gambling.game.chatChannel = ChatChannels[3] end);
+    UI.msgSay:SetScript("OnClick", ResetRollGame);
 
     UI:Hide();
     return UI;
@@ -191,11 +200,15 @@ end
 -------------------------
 
 gambling.commands = {
+    cleardb = clearDb,
+    announce = announceStats,
     roll = gambling.UI.Toggle,
     help = function()
         gambling:Print("List of all slash commands:")
         gambling:Print("|cff00cc66/gamba help|r - Shows all commands")
         gambling:Print("|cff00cc66/gamba roll|r - Opens the classic gambling game")
+        gambling:Print("|cff00cc66/gamba cleardb|r - Clears the persistant database")
+        gambling:Print("|cff00cc66/gamba announce|r - Announces player stats")
     end,
 };
 
