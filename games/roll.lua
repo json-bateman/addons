@@ -135,7 +135,8 @@ function OpenEntries()
     print(game.chatChannel)
     ChatMsg(".:MommaG's Casino:. --Classic Roll Off!--", game.chatChannel)
     ChatMsg(format("Please type `%s` to join the round (type `%s` to leave).", game.enterMessage, game.leaveMessage), game.chatChannel)
-    ChatMsg(format("Current Stakes are: %sg", game.wager, game.chatChannel))
+    ChatMsg(format("Current Stakes are: %sg", game.wager), game.chatChannel)
+    --ChatMsg(format("Current Stakes are: %sg", game.wager, game.chatChannel))
 
     chatFrame:SetScript("OnEvent", function(self, event, msg, name, ...)
         -- Name comes in like this [playerName]-[realm]
@@ -178,7 +179,8 @@ function FinishRoll()
     end
     local playersToRoll = checkPlayerRolls(session.players);
     if (#playersToRoll > 0) then
-        SendChatMessage("Some players still need to roll!")
+        ChatMsg("Some players still need to roll!", game.chatChannel)
+        --SendChatMessage("Some players still need to roll!")
         ChatMsg(MakeNameString(playersToRoll), game.chatChannel)
         return
     end
