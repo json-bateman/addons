@@ -125,6 +125,7 @@ chatFrame:RegisterEvent("CHAT_MSG_SAY")
 chatFrame:RegisterEvent("CHAT_MSG_PARTY")
 chatFrame:RegisterEvent("CHAT_MSG_RAID")
 chatFrame:RegisterEvent("CHAT_MSG_SYSTEM")
+chatFrame:RegisterEvent("CHAT_MSG_RAID_LEADER")
 
 function OpenEntries()
     if (session.gameState ~= GameStates[1]) then
@@ -142,9 +143,9 @@ function OpenEntries()
         -- So we must split name before adding to table.
         local playerName, _ = string.split('-', name)
 
-        if ( ((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID")) and msg == game.enterMessage ) then
+        if ( ((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID") or (event == "CHAT_MSG_RAID_LEADER")) and msg == game.enterMessage ) then
             addPlayer(playerName)
-        elseif ( ((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID")) and msg == game.leaveMessage ) then
+        elseif ( ((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID") or (event == "CHAT_MSG_RAID_LEADER")) and msg == game.leaveMessage ) then
             removePlayer(playerName)
         end
     end)
