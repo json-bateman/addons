@@ -21,6 +21,8 @@ ChatChannels = {
     "PARTY",
     "RAID",
     "GUILD",
+    "RAIDLEADER",
+    "RAID LEADER",
 }
 
 gambling.theme = {
