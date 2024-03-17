@@ -6,39 +6,42 @@ by default the second name is a table that is automatically shared between all f
 local _, gambling = ...
 
 -- GLOBAL VARS --
+COPPER_PER_SILVER = 100
+SILVER_PER_GOLD = 100
+
 GameStates = {
-    "REGISTRATION",
-    "ROLLING",
+   "REGISTRATION",
+   "ROLLING",
 }
 
 GameModes = {
-    "ROLL",
-    "LOTTERY",
+   "ROLL",
+   "LOTTERY",
 }
 
 ChatChannels = {
-    "SAY",
-    "PARTY",
-    "RAID",
-    "GUILD",
-    "RAIDLEADER",
-    "RAID LEADER",
+   "SAY",
+   "PARTY",
+   "RAID",
+   "GUILD",
+   "RAIDLEADER",
+   "RAID LEADER",
 }
 
 gambling.theme = {
-    r = 0,
-    g = 0.8, -- 204/255
-    b = 1,
-    hex = "00ccff",
+   r = 0,
+   g = 0.8, -- 204/255
+   b = 1,
+   hex = "00ccff",
 }
 
 gambling.game = {
-    enterMessage = "gamba",
-    leaveMessage = "job done",
-    mode = GameModes[1],
-    chatChannel = ChatChannels[1],
-    houseCut = 0,
-    wager = 1,
-    min = 1,
-    max = 100,
+   enterMessage = "gamba",
+   leaveMessage = "job done",
+   mode = GameModes[1],
+   chatChannel = ChatChannels[1],
+   houseCut = 0,
+   wager = 1,
+   min = 1,
+   max = 100,
 }
