@@ -18,20 +18,21 @@ function CaptureMoneyTraded()
     return playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
 end
 
--- function tradeHandler(self, event, ...)
---     print("Event: " .. event)
+function tradeHandler(self, event, ...)
+    print("Event: " .. event)
 
---     local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
---     if event == "TRADE_ACCEPT_UPDATE" then
---         local playerAccept, targetAccept = ...
---         local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper = captureMoneyTraded()
---         if targetAccept == 1 and targetCopper == 1 then
---             print('playerCopper: ', playerCopper, "targetCopper: ", targetCopper)
---             AcceptTrade()
---         end
---     end
---     if event == "TRADE_REQUEST_CANCEL" then
--- end
+    local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper
+    if event == "TRADE_ACCEPT_UPDATE" then
+        local playerAccept, targetAccept = ...
+        local playerGold, playerSilver, playerCopper, targetGold, targetSilver, targetCopper = captureMoneyTraded()
+        if targetAccept == 1 and targetCopper == 1 then
+            print('playerCopper: ', playerCopper, "targetCopper: ", targetCopper)
+            AcceptTrade()
+        end
+    end
+    if event == "TRADE_REQUEST_CANCEL" then
+end
+end
 
 local tradeFrame = CreateFrame("Frame")
 tradeFrame:RegisterEvent("TRADE_SHOW")
