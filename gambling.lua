@@ -123,7 +123,7 @@ function UI:CreateClassicMenu()
    ---@class GambaUI.goldSlider : Slider
    GambaUI.goldSlider = CreateFrame("Slider", nil, GambaUI, "OptionsSliderTemplate");
    GambaUI.goldSlider:SetPoint("CENTER", GambaUI, "TOP", 0, -170);
-   GambaUI.goldSlider:SetMinMaxValues(1, 10);
+   GambaUI.goldSlider:SetMinMaxValues(1, 50);
    GambaUI.goldSlider:SetValue(gambling.game.wager);
    GambaUI.goldSlider:SetValueStep(1);
    GambaUI.goldSlider:SetObeyStepOnDrag(true);
