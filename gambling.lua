@@ -120,19 +120,32 @@ function UI:CreateClassicMenu()
    GambaUI.finishRoll:SetScript("OnClick", FinishRoll);
 
    -- UI Gold Amount Slider
+   -- Custom Slider, WoW's latest update 9/24 Deprecated "OptionsTemplateSlider"
+   local slider = CreateFrame("Slider", nil, GambaUI, "UISliderTemplate")
+   slider:SetHeight(20)
+   slider:SetPoint("RIGHT", GambaUI, -30, -10)
+   slider:SetPoint("LEFT", GambaUI, 30, -10)
+   slider:SetPoint("TOP", GambaUI, 0, -160)
+   slider:SetMinMaxValues(5,100)
+   slider.High = slider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+   slider.High:SetPoint("TOPRIGHT", slider, "BOTTOMRIGHT")
+   slider.Low = slider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+   slider.Low:SetPoint("TOPLEFT", slider, "BOTTOMLEFT")
+   slider.Text = slider:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+   slider.Text:SetPoint("BOTTOM", slider, "TOP")
+   slider.High:SetText("100")
+   slider:SetValue(gambling.game.wager)
+   slider.Low:SetText("5")
+   slider:SetValueStep(5)
+   slider:SetObeyStepOnDrag(true)
    ---@class GambaUI.goldSlider : Slider
-   GambaUI.goldSlider = CreateFrame("Slider", nil, GambaUI, "OptionsSliderTemplate");
-   GambaUI.goldSlider:SetPoint("CENTER", GambaUI, "TOP", 0, -170);
-   GambaUI.goldSlider:SetMinMaxValues(1, 50);
-   GambaUI.goldSlider:SetValue(gambling.game.wager);
-   GambaUI.goldSlider:SetValueStep(1);
-   GambaUI.goldSlider:SetObeyStepOnDrag(true);
+   GambaUI.goldSlider = slider
 
-   -- Assuming UI.goldSlider is already created
+   -- Display Gold Wager below, assuming UI.goldSlider is already created
    GambaUI.goldSlider.text = GambaUI.goldSlider:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    GambaUI.goldSlider.text:SetPoint("TOP", GambaUI.goldSlider, "BOTTOM", 0, -5) -- Adjust the position as needed
 
-   -- Set initial text
+   -- Set initial wager 
    GambaUI.goldSlider.text:SetText(string.format("%dg", GambaUI.goldSlider:GetValue()))
 
    GambaUI.goldSlider:SetScript("OnValueChanged", function(self, value)
@@ -141,7 +154,6 @@ function UI:CreateClassicMenu()
    end)
 
    -- UI Message Channel Type
-
    GambaUI.msgSay = CreateFrame("Button", nil, GambaUI, "GameMenuButtonTemplate");
    GambaUI.msgSay:SetPoint("CENTER", GambaUI, "TOP", 0, -210);
    GambaUI.msgSay:SetSize(60, 20);

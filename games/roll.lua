@@ -126,6 +126,7 @@ chatFrame:RegisterEvent("CHAT_MSG_PARTY")
 chatFrame:RegisterEvent("CHAT_MSG_RAID")
 chatFrame:RegisterEvent("CHAT_MSG_SYSTEM")
 chatFrame:RegisterEvent("CHAT_MSG_RAID_LEADER")
+chatFrame:RegisterEvent("CHAT_MSG_PARTY_LEADER")
 
 function OpenEntries()
    if (session.gameState ~= GameStates[1]) then
@@ -134,7 +135,9 @@ function OpenEntries()
    end
    print(game.chatChannel)
    ChatMsg(".:MommaG's Casino:. --Classic Roll Off!--", game.chatChannel)
-   ChatMsg(format("Please type `%s` to join the round (type `%s` to leave).", game.enterMessage, game.leaveMessage),
+   ChatMsg(format("Please type `%s` to join the round", game.enterMessage),
+      game.chatChannel)
+   ChatMsg(format("(Type `%s` to leave).", game.leaveMessage),
       game.chatChannel)
    ChatMsg(format("Current Stakes are: %sg", game.wager), game.chatChannel)
    --ChatMsg(format("Current Stakes are: %sg", game.wager, game.chatChannel))
@@ -145,9 +148,9 @@ function OpenEntries()
       -- So we must split name before adding to table.
       local playerName, _ = string.split('-', name)
 
-      if (((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID") or (event == "CHAT_MSG_RAID_LEADER")) and msg == game.enterMessage) then
+      if (((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID") or (event == "CHAT_MSG_PARTY_LEADER") or (event == "CHAT_MSG_RAID_LEADER")) and string.lower(msg) == string.lower(game.enterMessage)) then
          addPlayer(playerName)
-      elseif (((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID") or (event == "CHAT_MSG_RAID_LEADER")) and msg == game.leaveMessage) then
+      elseif (((event == "CHAT_MSG_SAY") or (event == "CHAT_MSG_PARTY") or (event == "CHAT_MSG_RAID") or (event == "CHAT_MSG_PARTY_LEADER") or (event == "CHAT_MSG_RAID_LEADER")) and string.lower(msg) == string.lower(game.leaveMessage)) then
          removePlayer(playerName)
       end
    end)
@@ -166,7 +169,7 @@ function StartRoll()
    end
 
    ChatMsg("Begin rolling you degenerate gamblers!", game.chatChannel)
-   chatFrame:SetScript("OnEvent", function(self, event, msg, name, ...)
+   chatFrame:SetScript("OnEvent", function(self, event, msg, ...)
       if (event == "CHAT_MSG_SYSTEM") then
          handleSystemMessage(self, msg)
       end
