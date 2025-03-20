@@ -9,5 +9,4 @@
 globals.lua
 utils.lua
 games/roll.lua
-games/noobDown.lua
 gambling.lua

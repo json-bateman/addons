@@ -43,5 +43,5 @@ gambling.game = {
    houseCut = 0,
    wager = 1,
    min = 1,
-   max = 100,
+   max = 500,
 }

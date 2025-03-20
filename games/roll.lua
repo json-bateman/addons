@@ -218,14 +218,14 @@ function FinishRoll()
       for _, player in ipairs(session.players) do
          player.roll = nil
       end
-      SendChatMessage("High end tie breaker! " .. MakeNameString(session.players) .. " /roll now!")
+      ChatMsg("High end tie breaker! " .. MakeNameString(session.players) .. " /roll now!", game.chatChannel)
    elseif (results ~= nil and #session.results.losers > 1) then
       session.lowTiebreaker = true
       session.players = results.losers
       for _, player in ipairs(session.players) do
          player.roll = nil
       end
-      SendChatMessage("Low end tie breaker! " .. MakeNameString(session.players) .. " /roll now!")
+      ChatMsg("Low end tie breaker! " .. MakeNameString(session.players) .. " /roll now!", game.chatChannel)
    else
       -- No Ties, no tiebreaker needed, display results:
       ChatMsg(

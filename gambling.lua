@@ -25,7 +25,8 @@ local function announceStats()
    if (DB.stats ~= nil) then
       table.sort(DB.stats, function(a, b) return a.totalWinnings < b.totalWinnings end)
       for i = 1, #DB.stats do
-         ChatMsg(format("%s. %s won %s Silver!", i, DB.stats[i].name, DB.stats[i].totalWinnings),
+
+         ChatMsg(format("%s. %s won %d Gold!", i, DB.stats[i].name, math.floor(DB.stats[i].totalWinnings / 100)),
             gambling.game.chatChannel)
       end
       Tprint(DB.stats)
